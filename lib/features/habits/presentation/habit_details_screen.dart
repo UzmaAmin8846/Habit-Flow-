@@ -71,7 +71,7 @@ class HabitDetailsScreen extends ConsumerWidget {
     final ok = await ref.read(habitActionsProvider.notifier).delete(habitId);
     if (!context.mounted) return;
     if (ok) {
-      context.pop();
+      context.go('/');
     } else {
       showSnack(context, errorMessage(ref.read(habitActionsProvider).error), error: true);
     }
