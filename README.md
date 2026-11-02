@@ -31,3 +31,14 @@ To run in Chrome:
 ```
 flutter run -d chrome
 ```
+
+## Deploy to Vercel
+
+The repository includes Vercel build configuration for Flutter Web. Import this
+GitHub repository into Vercel, keep the project root set to the repository root,
+and set `main` as the production branch. Vercel will install the pinned Flutter
+SDK, build `build/web`, and deploy it automatically whenever changes reach
+`main`.
+
+Add your Vercel deployment domain to Firebase Authentication's authorized
+domains so sign-in works from the deployed site.
