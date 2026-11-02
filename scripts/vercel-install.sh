@@ -16,5 +16,6 @@ if [[ ! -x "${FLUTTER_ROOT}/bin/flutter" ]]; then
   tar -xJf "$archive" -C "$HOME"
 fi
 
+git config --global --add safe.directory "$FLUTTER_ROOT"
 "${FLUTTER_ROOT}/bin/flutter" config --enable-web
 "${FLUTTER_ROOT}/bin/flutter" pub get
