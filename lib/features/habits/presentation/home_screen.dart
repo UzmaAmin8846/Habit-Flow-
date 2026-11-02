@@ -19,7 +19,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<AsyncValue<void>>(habitActionsProvider, (_, next) {
-      if (next.hasError) showSnack(context, errorMessage(next.error), error: true);
+      if (next.hasError) {
+        showSnack(context, errorMessage(next.error), error: true);
+      }
     });
 
     final habits = ref.watch(habitsProvider);
@@ -49,21 +51,70 @@ class HomeScreen extends ConsumerWidget {
               empty: EmptyState(
                 icon: Icons.self_improvement_rounded,
                 title: 'No habits yet',
-                message: 'Small steps every day add up.\nCreate your first habit to begin.',
+                message:
+                    'Small steps every day add up.\nCreate your first habit to begin.',
                 actionLabel: 'Add a habit',
                 onAction: () => context.push('/habit/new'),
               ),
-              data: (items) => GridView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-                // 1 column on phones, 2+ on tablets / wide screens.
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 560,
-                  mainAxisExtent: 96,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                ),
-                itemCount: items.length,
-                itemBuilder: (_, i) => HabitCard(habit: items[i]),
+              data: (items) => CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 14),
+                    sliver: SliverToBoxAdapter(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Your habits',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${items.length} ${items.length == 1 ? 'habit' : 'habits'}',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    sliver: SliverGrid(
+                      // One column on phones, two or more on wider screens.
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 560,
+                        mainAxisExtent: 96,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (_, i) => HabitCard(habit: items[i]),
+                        childCount: items.length,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -93,20 +144,72 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(prettyDate(DateTime.now()),
-              style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          const SizedBox(height: 4),
-          Text('${greeting()}, $name 👋',
-              style: const TextStyle(
-                  color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 16),
-          Text(
-            total == 0
-                ? 'Add a habit to get started'
-                : done == total
-                    ? 'All done today. Great job! 🎉'
-                    : '$done of $total habits done today',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      prettyDate(DateTime.now()),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${greeting()}, $name',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        height: 1.15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      total == 0
+                          ? 'Add a habit to get started'
+                          : done == total
+                              ? 'All done today. Great job!'
+                              : 'Keep going, you’re doing great',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 68,
+                height: 68,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 6,
+                      backgroundColor: Colors.white24,
+                      valueColor: const AlwaysStoppedAnimation(Colors.white),
+                    ),
+                    Text(
+                      '$done/$total',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           TweenAnimationBuilder<double>(
@@ -122,6 +225,11 @@ class _Header extends StatelessWidget {
                 valueColor: const AlwaysStoppedAnimation(Colors.white),
               ),
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$done of $total completed',
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
           ),
         ],
       ),
